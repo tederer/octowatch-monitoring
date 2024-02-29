@@ -39,7 +39,7 @@ app.get('/metrics', (req, res) => {
    Object.keys(temperatureValues ?? {}).forEach(key => {
       var temperature = temperatureValues[key];
       if (temperature !== undefined) {
-         content += 'temperature{type="' + key + '"} ' + temperature.value + ' \n';
+         content += 'octowatch_temperature{type="' + key + '"} ' + temperature.value + ' \n';
       }
    });
    
@@ -47,7 +47,7 @@ app.get('/metrics', (req, res) => {
    if (humidity !== undefined) {
       content += '\n# HELP humidity in percent\n';
       content += '# TYPE humidity gauge\n';
-      content += 'humidity ' + humidity.value + '\n';
+      content += 'octowatch_humidity ' + humidity.value + '\n';
    }
    
    res.set({
