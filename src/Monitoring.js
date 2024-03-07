@@ -6,13 +6,18 @@ require('./CpuTemperature.js');
 require('./GpuTemperature.js');
 require('./Dht20.js');
 
+const fs = require('node:fs');
+
 assertNamespace('octowatch');
 
 octowatch.Monitoring = function Monitoring() {
-   var TIMEOUT_IN_MS = 10000;
-   var LOGGER = common.logging.LoggingSystem.createLogger('Monitoring');
+   const TIMEOUT_IN_MS               = 10000;
+   const MAX_ALLOWED_ENV_TEMPERATURE = 40;
+   const SEMAPHORE_FILE              = '/home/tux/.temperatureTooHigh';
+   const LOGGER                      = common.logging.LoggingSystem.createLogger('Monitoring');
    
-   var currentValues = {};
+   var currentValues                 = {};
+   var environmentTemperatureTooHigh = false;
    
    var removeTooOldValues = function removeTooOldValues() {
       var nowInMs =  Date.now();
@@ -36,6 +41,18 @@ octowatch.Monitoring = function Monitoring() {
       setTimeout(removeTooOldValues, 1000);
    };
    
+   var updateSemaphoreFile = function updateSemaphoreFile() {
+      if (environmentTemperatureTooHigh) {
+         LOGGER.logInfo('creating semaphore file');
+         fs.writeFileSync(SEMAPHORE_FILE, '');
+      } else {
+         if (fs.existsSync(SEMAPHORE_FILE)) {
+            LOGGER.logInfo('removing semaphore file');
+            fs.rmSync(SEMAPHORE_FILE);
+         }
+      }
+   };
+   
    var onHumidityUpdate = function onHumidityUpdate(newHumidity) {
       LOGGER.logDebug('new humidity: ' + newHumidity);
       currentValues.humidity = {value: newHumidity, timestamp: Date.now()};
@@ -47,11 +64,22 @@ octowatch.Monitoring = function Monitoring() {
          currentValues.temperatures = {};
       }
       currentValues.temperatures[key] = {value: temperature, timestamp: Date.now()};
+      
+      if (key === 'env') {
+         var tooHigh = temperature > MAX_ALLOWED_ENV_TEMPERATURE;
+         currentValues.temperatures.env.tooHigh = tooHigh;
+         if (environmentTemperatureTooHigh !== tooHigh) {
+            environmentTemperatureTooHigh = tooHigh;
+            updateSemaphoreFile();
+         }
+      }
    };
    
    this.getValues = function getValues() {
       return currentValues;
    };
+   
+   updateSemaphoreFile();
    
    new octowatch.CpuTemperature(onTemperatureUpdate.bind(undefined, 'cpu'));
    new octowatch.GpuTemperature(onTemperatureUpdate.bind(undefined, 'gpu'));
