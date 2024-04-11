@@ -12,7 +12,7 @@ const DEFAULT_PORT = 9090;
 const LOGGER       = common.logging.LoggingSystem.createLogger('Main');
 const VERSION      = common.getVersion();
                    
-var port           = process.env.WEBSERVER_PORT   ?? DEFAULT_PORT;
+var port           = process.env.WEBSERVER_PORT ?? DEFAULT_PORT;
 var monitoring     = new octowatch.Monitoring();
    
 LOGGER.logInfo('version:        ' + VERSION);

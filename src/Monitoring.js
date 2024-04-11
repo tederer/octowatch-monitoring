@@ -1,4 +1,4 @@
-/* global octowatch, common, assertNamespace, setTimeout */
+/* global octowatch, common, assertNamespace, setTimeout, process */
 
 require('./common/logging/LoggingSystem.js');
 
@@ -13,8 +13,10 @@ assertNamespace('octowatch');
 octowatch.Monitoring = function Monitoring() {
    const TIMEOUT_IN_MS               = 10000;
    const MAX_ALLOWED_ENV_TEMPERATURE = 40;
-   const SEMAPHORE_FILE              = '/home/tux/.temperatureTooHigh';
+   const SEMAPHORE_FILE              = process.env.HOME + '/.temperatureTooHigh';
    const LOGGER                      = common.logging.LoggingSystem.createLogger('Monitoring');
+   
+   LOGGER.logDebug('semaphore file: ' + SEMAPHORE_FILE);
    
    var currentValues                 = {};
    var environmentTemperatureTooHigh = false;
