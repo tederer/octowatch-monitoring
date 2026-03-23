@@ -43,6 +43,7 @@ ExecStart = <user-home>/octowatch-monitoring/start.sh
 
 [ Install ]
 WantedBy = multi-user.target
+```
 
 ## References
 
