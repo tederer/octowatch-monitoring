@@ -25,6 +25,25 @@ The following steps describe how to install the monitoring service on your Raspb
 
 Execute `start.sh`.
 
+## Starting the service automatically
+
+To enable automatic start at system boot, create a file called `octowatch-monitoring.service` in `/usr/lib/systemd/system` containing the following content (replace `<user>`, `<group>` and `<user-home>` with the corresponding values for your system):
+
+```
+[ Unit ]
+Description = OctoWatch Monitoring Service
+After = network-online.target
+Wants = network-online.target
+
+[ Service ]
+Type = simple
+User = <user>
+Group =<group>
+ExecStart = <user-home>/octowatch-monitoring/start.sh
+
+[ Install ]
+WantedBy = multi-user.target
+
 ## References
 
 https://prometheus.io/docs/instrumenting/exposition_formats/  
